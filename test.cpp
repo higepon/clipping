@@ -37,6 +37,9 @@ class Graphics {
   int y_min_;
   int y_max_;
  public:
+  Graphics() : drew_something_(false) {
+  }
+
   void setClip(int x, int y, int w, int h) {
     x_min_ = x;
     x_max_ = x + w;
@@ -85,6 +88,19 @@ TEST_F(ClippingTest, PixelInsideOfClippedRegionShouldBeRenderred) {
   g_.drawPixel(5, 5);
   EXPECT_TRUE(g_.drewSomething());
 }
+
+TEST_F(ClippingTest, LineOutsideOfClippedRegionShouldNotBeRenderred) {
+  g_.setClip(0, 0, 10, 10);
+  g_.drawLine(20, 20, 40, 40);
+  EXPECT_FALSE(g_.drewSomething());
+}
+
+TEST_F(ClippingTest, LineInsideOfClippedRegionShouldBeRenderred) {
+  g_.setClip(0, 0, 10, 10);
+  g_.drawLine(2, 2, 4, 4);
+  EXPECT_TRUE(g_.drewSomething());
+}
+
 
 }  // namespace
 
