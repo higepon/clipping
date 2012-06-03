@@ -30,6 +30,34 @@
 
 namespace {
 
+class Graphics {
+ public:
+  void setClip(int x, int y, int w, int h) {}
+  void drawLine(int x1, int y1, int x2, int y2) {}
+
+  // for testability
+  bool drewSomething() const {
+    return false;
+  }
+};
+
+class ClippingTest : public ::testing::Test {
+ protected:
+  Graphics g_;
+ public:
+  ClippingTest() {
+  }
+
+  virtual ~ClippingTest() {
+  }
+};
+
+TEST_F(ClippingTest, LineOutsideOfClippedRegionShouldNotBeRenderred) {
+  g_.setClip(0, 0, 10, 10);
+  g_.drawLine(20, 20, 30, 30);
+  EXPECT_FALSE(g_.drewSomething());
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {
