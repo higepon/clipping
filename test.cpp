@@ -31,15 +31,36 @@
 namespace {
 
 class Graphics {
+ private:
+  int x_min_;
+  int x_max_;
+  int y_min_;
+  int y_max_;
  public:
-  void setClip(int x, int y, int w, int h) {}
+  void setClip(int x, int y, int w, int h) {
+    x_min_ = x;
+    x_max_ = x + w;
+    y_min_ = y;
+    y_max_ = y + h;
+  }
   void drawLine(int x1, int y1, int x2, int y2) {}
-  void drawPixel(int x, int y) {}
+
+  void drawPixel(int x, int y) {
+    if (x >= x_min_ && x <= x_max_ && y >= y_min_ && y <= y_max_) {
+      markAsDrewSomething();
+    }
+  }
 
   // for testability
   bool drewSomething() const {
-    return false;
+    return drew_something_;
   }
+ private:
+  void markAsDrewSomething() {
+    drew_something_ = true;
+  }
+
+  bool drew_something_;
 };
 
 class ClippingTest : public ::testing::Test {
