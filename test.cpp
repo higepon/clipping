@@ -34,6 +34,7 @@ class Graphics {
  public:
   void setClip(int x, int y, int w, int h) {}
   void drawLine(int x1, int y1, int x2, int y2) {}
+  void drawPixel(int x, int y) {}
 
   // for testability
   bool drewSomething() const {
@@ -52,10 +53,16 @@ class ClippingTest : public ::testing::Test {
   }
 };
 
-TEST_F(ClippingTest, LineOutsideOfClippedRegionShouldNotBeRenderred) {
+TEST_F(ClippingTest, PixelOutsideOfClippedRegionShouldNotBeRenderred) {
   g_.setClip(0, 0, 10, 10);
-  g_.drawLine(20, 20, 30, 30);
+  g_.drawPixel(20, 20);
   EXPECT_FALSE(g_.drewSomething());
+}
+
+TEST_F(ClippingTest, PixelInsideOfClippedRegionShouldBeRenderred) {
+  g_.setClip(0, 0, 10, 10);
+  g_.drawPixel(5, 5);
+  EXPECT_TRUE(g_.drewSomething());
 }
 
 }  // namespace
