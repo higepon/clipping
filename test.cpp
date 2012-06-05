@@ -47,19 +47,19 @@ class Graphics {
     y_max_ = y + h;
   }
   void drawLine(int x1, int y1, int x2, int y2) {
-    CohenSutherlandLineClipAndDraw(x1, y1, x2, y2);
+    CohenSutherlandLineClip(x1, y1, x2, y2);
   }
   typedef int OutCode;
-  enum {INSIDE = 0, // 0000
-        LEFT = 1,   // 0001
-        RIGHT = 2,  // 0010
-        BOTTOM = 4, // 0100
-        TOP = 8 };    // 1000
+  enum {
+    INSIDE = 0,  // 0000
+    LEFT = 1,    // 0001
+    RIGHT = 2,   // 0010
+    BOTTOM = 4,  // 0100
+    TOP = 8      // 1000
+  };
   OutCode ComputeOutCode(double x, double y) {
     OutCode code;
- 
     code = INSIDE;          // initialised as being inside of clip window
- 
     if (x < x_min_)           // to the left of clip window
       code |= LEFT;
     else if (x > x_max_)      // to the right of clip window
@@ -68,55 +68,49 @@ class Graphics {
       code |= BOTTOM;
     else if (y > y_max_)      // above the clip window
       code |= TOP;
- 
     return code;
   }
 
   // http://en.wikipedia.org/wiki/Cohen%E2%80%93Sutherland
-  void CohenSutherlandLineClipAndDraw(double x0, double y0, double x1, double y1) {
-    // compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
+  void CohenSutherlandLineClip(double x0, double y0, double x1, double y1) {
     OutCode outcode0 = ComputeOutCode(x0, y0);
     OutCode outcode1 = ComputeOutCode(x1, y1);
     bool accept = false;
- 
     while (true) {
-      if (!(outcode0 | outcode1)) { // Bitwise OR is 0. Trivially accept and get out of loop
+      if (!(outcode0 | outcode1)) {
+        // Bitwise OR is 0. Trivially accept and get out of loop
         accept = true;
         break;
-      } else if (outcode0 & outcode1) { // Bitwise AND is not 0. Trivially reject and get out of loop
+
+      } else if (outcode0 & outcode1) {
+      // Bitwise AND is not 0. Trivially reject and get out of loop
         break;
       } else {
         // failed both tests, so calculate the line segment to clip
         // from an outside point to an intersection with clip edge
         double x, y;
- 
         // At least one endpoint is outside the clip rectangle; pick it.
         OutCode outcodeOut = outcode0? outcode0 : outcode1;
- 
         // Now find the intersection point;
-        // use formulas y = y0 + slope * (x - x0), x = x0 + (1 / slope) * (y - y0)
+        // use formulas y = y0 + slope * (x - x0),
+        //              x = x0 + (1 / slope) * (y - y0)
         if (outcodeOut & TOP) {           // point is above the clip rectangle
           x = x0 + (x1 - x0) * (y_max_ - y0) / (y1 - y0);
           y = y_max_;
-        } else if (outcodeOut & BOTTOM) { // point is below the clip rectangle
+        } else if (outcodeOut & BOTTOM) {
+          // point is below the clip rectangle
           x = x0 + (x1 - x0) * (y_min_ - y0) / (y1 - y0);
           y = y_min_;
-        } else if (outcodeOut & RIGHT) {  // point is to the right of clip rectangle
+        } else if (outcodeOut & RIGHT) {
+          // point is to the right of clip rectangle
           y = y0 + (y1 - y0) * (x_max_- x0) / (x1 - x0);
           x = x_max_;
-        } else if (outcodeOut & LEFT) {   // point is to the left of clip rectangle
+        } else if (outcodeOut & LEFT) {
+          // point is to the left of clip rectangle
           y = y0 + (y1 - y0) * (x_min_ - x0) / (x1 - x0);
           x = x_min_;
         }
- 
-        //NOTE:*****************************************************************************************
- 
-        /* if you follow this algorithm exactly(at least for c#), then you will fall into an infinite loop 
-           in case a line crosses more than two segments. to avoid that problem, leave out the last else
-           if(outcodeOut & LEFT) and just make it else*/
- 
-        //**********************************************************************************************
- 
+
         // Now we move outside point to intersection point to clip
         // and get ready for next pass.
         if (outcodeOut == outcode0) {
@@ -131,7 +125,6 @@ class Graphics {
       }
     }
     if (accept) {
-      // Following functions are left for implementation by user based on his platform(OpenGL/graphics.h etc.)
       //      DrawRectangle(xmin, ymin, xmax, ymax);
       //      LineSegment(x0, y0, x1, y1);
       markAsDrewSomething();
