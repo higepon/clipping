@@ -27,8 +27,39 @@
  */
 #include <stdint.h>
 #include <gtest/gtest.h>
+#include <vector>
 
 namespace {
+
+struct DrawAction {
+  DrawAction(int x, int y) :
+      type(PIXEL),
+      x(x),
+      y(y),
+      x_end(0),
+      y_end(0) {
+  }
+
+  DrawAction(int x, int y, int x_end, int y_end) :
+      type(LINE),
+      x(x),
+      y(y),
+      x_end(x_end),
+      y_end(y_end) {
+  }
+
+  enum ActionType {
+    LINE,
+    PIXEL,
+  };
+  ActionType type;
+  int x;
+  int y;
+  int x_end;
+  int y_end;
+};
+
+typedef std::vector<DrawAction> DrawActions;
 
 class Graphics {
  public:
@@ -55,11 +86,10 @@ class Graphics {
   bool drewSomething() const {
     return drew_something_;
   }
- private:
-  void markAsDrewSomething() {
-    drew_something_ = true;
-  }
 
+  DrawActions drawActions() const {
+    return actions_;
+  }
  private:
   typedef int OutCode;
   enum {
@@ -69,6 +99,10 @@ class Graphics {
     BOTTOM = 4,  // 0100
     TOP = 8      // 1000
   };
+
+  void markAsDrewSomething() {
+    drew_something_ = true;
+  }
 
   OutCode ComputeOutCode(double x, double y) {
     OutCode code;
@@ -152,6 +186,7 @@ class Graphics {
   double x_max_;
   double y_min_;
   double y_max_;
+  DrawActions actions_;
 };
 
 class ClippingTest : public ::testing::Test {
@@ -188,6 +223,19 @@ TEST_F(ClippingTest, LineInsideOfClippedRegionShouldBeRenderred) {
   g_.drawLine(2, 2, 4, 4);
   EXPECT_TRUE(g_.drewSomething());
 }
+
+TEST_F(ClippingTest, HorizontalLineShouldBeClipped) {
+  g_.setClip(0, 0, 10, 10);
+  g_.drawLine(0, 5, 20, 5);
+  DrawActions actions = g_.drawActions();
+  ASSERT_EQ(1, actions.size());
+  ASSERT_EQ(DrawAction::LINE, actions[0].type);
+  ASSERT_EQ(0, actions[0].x);
+  ASSERT_EQ(5, actions[0].y);
+  ASSERT_EQ(10, actions[0].x_end);
+  ASSERT_EQ(5, actions[0].y_end);
+}
+
 
 }  // namespace
 
