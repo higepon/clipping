@@ -177,8 +177,13 @@ class Graphics {
     if (accept) {
       //      DrawRectangle(xmin, ymin, xmax, ymax);
       //      LineSegment(x0, y0, x1, y1);
+      addDrawAction(DrawAction(x0, y0, x1, y1));
       markAsDrewSomething();
     }
+  }
+
+  void addDrawAction(const DrawAction& action) {
+    actions_.push_back(action);
   }
 
   bool drew_something_;
