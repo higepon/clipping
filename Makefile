@@ -1,6 +1,19 @@
 TARGET  = ./test
 SOURCES = test.cpp
-CXXFLAGS = -Wall -g
+CXXFLAGS = -g \
+ -Wall \
+ -Wextra \
+ -Wno-unused-parameter \
+ -Wno-sign-compare \
+ -Wno-missing-field-initializers \
+ -Wformat=2 \
+ -Wstrict-aliasing=2 \
+ -Wdisabled-optimization \
+ -Wfloat-equal \
+ -Wpointer-arith \
+ -Wcast-align \
+ -Wredundant-decls \
+ -Winline
 
 OBJECTS = $(SOURCES:.cpp=.o)
 
