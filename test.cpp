@@ -257,6 +257,14 @@ TEST_F(ClippingTest, HorizontalLineShouldBeClipped) {
   ASSERT_EQ(DrawAction(0, 5, 10, 5), actions[0]);
 }
 
+TEST_F(ClippingTest, VerticalLineShouldBeClipped) {
+  g_.setClip(0, 0, 10, 10);
+  g_.drawLine(5, 0, 5, 20);
+  DrawActions actions = g_.drawActions();
+  ASSERT_EQ(1, actions.size());
+  ASSERT_EQ(DrawAction(5, 0, 5, 10), actions[0]);
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {
