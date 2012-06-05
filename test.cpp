@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <gtest/gtest.h>
 #include <vector>
+#include <string>
 
 namespace {
 
@@ -48,6 +49,17 @@ struct DrawAction {
       y_end(y_end) {
   }
 
+  std::string toString() const {
+    char buf[256];
+    if (type == PIXEL) {
+      snprintf(buf, sizeof(buf), "DrawAction(%d, %d)", x, y);
+    } else {
+      snprintf(buf, sizeof(buf), "DrawAction(%d, %d, %d, %d)",
+               x, y, x_end, y_end);
+    }
+    return buf;
+  }
+
   enum ActionType {
     LINE,
     PIXEL,
@@ -58,6 +70,19 @@ struct DrawAction {
   int x_end;
   int y_end;
 };
+
+bool operator==(DrawAction a, DrawAction b) {
+  return
+      a.type == b.type &&
+      a.x == b.x &&
+      a.y == b.y &&
+      a.x_end == b.x_end &&
+      a.y_end == b.y_end;
+}
+
+::std::ostream& operator<<(::std::ostream& os, const DrawAction& action) {
+  return os << action.toString();
+}
 
 typedef std::vector<DrawAction> DrawActions;
 
@@ -234,13 +259,8 @@ TEST_F(ClippingTest, HorizontalLineShouldBeClipped) {
   g_.drawLine(0, 5, 20, 5);
   DrawActions actions = g_.drawActions();
   ASSERT_EQ(1, actions.size());
-  ASSERT_EQ(DrawAction::LINE, actions[0].type);
-  ASSERT_EQ(0, actions[0].x);
-  ASSERT_EQ(5, actions[0].y);
-  ASSERT_EQ(10, actions[0].x_end);
-  ASSERT_EQ(5, actions[0].y_end);
+  ASSERT_EQ(DrawAction(0, 5, 10, 5), actions[0]);
 }
-
 
 }  // namespace
 
