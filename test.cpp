@@ -31,11 +31,6 @@
 namespace {
 
 class Graphics {
- private:
-  double x_min_;
-  double x_max_;
-  double y_min_;
-  double y_max_;
  public:
   Graphics() : drew_something_(false) {
   }
@@ -49,6 +44,23 @@ class Graphics {
   void drawLine(int x1, int y1, int x2, int y2) {
     CohenSutherlandLineClip(x1, y1, x2, y2);
   }
+
+  void drawPixel(int x, int y) {
+    if (x >= x_min_ && x <= x_max_ && y >= y_min_ && y <= y_max_) {
+      markAsDrewSomething();
+    }
+  }
+
+  // for testability
+  bool drewSomething() const {
+    return drew_something_;
+  }
+ private:
+  void markAsDrewSomething() {
+    drew_something_ = true;
+  }
+
+ private:
   typedef int OutCode;
   enum {
     INSIDE = 0,  // 0000
@@ -57,17 +69,20 @@ class Graphics {
     BOTTOM = 4,  // 0100
     TOP = 8      // 1000
   };
+
   OutCode ComputeOutCode(double x, double y) {
     OutCode code;
-    code = INSIDE;          // initialised as being inside of clip window
-    if (x < x_min_)           // to the left of clip window
+    code = INSIDE;
+    if (x < x_min_) {
       code |= LEFT;
-    else if (x > x_max_)      // to the right of clip window
+    } else if (x > x_max_) {
       code |= RIGHT;
-    if (y < y_min_)           // below the clip window
+    }
+    if (y < y_min_) {
       code |= BOTTOM;
-    else if (y > y_max_)      // above the clip window
+    } else if (y > y_max_) {
       code |= TOP;
+    }
     return code;
   }
 
@@ -83,7 +98,7 @@ class Graphics {
         break;
 
       } else if (outcode0 & outcode1) {
-      // Bitwise AND is not 0. Trivially reject and get out of loop
+        // Bitwise AND is not 0. Trivially reject and get out of loop
         break;
       } else {
         // failed both tests, so calculate the line segment to clip
@@ -94,7 +109,8 @@ class Graphics {
         // Now find the intersection point;
         // use formulas y = y0 + slope * (x - x0),
         //              x = x0 + (1 / slope) * (y - y0)
-        if (outcodeOut & TOP) {           // point is above the clip rectangle
+        if (outcodeOut & TOP) {
+          // point is above the clip rectangle
           x = x0 + (x1 - x0) * (y_max_ - y0) / (y1 - y0);
           y = y_max_;
         } else if (outcodeOut & BOTTOM) {
@@ -131,22 +147,11 @@ class Graphics {
     }
   }
 
-  void drawPixel(int x, int y) {
-    if (x >= x_min_ && x <= x_max_ && y >= y_min_ && y <= y_max_) {
-      markAsDrewSomething();
-    }
-  }
-
-  // for testability
-  bool drewSomething() const {
-    return drew_something_;
-  }
- private:
-  void markAsDrewSomething() {
-    drew_something_ = true;
-  }
-
   bool drew_something_;
+  double x_min_;
+  double x_max_;
+  double y_min_;
+  double y_max_;
 };
 
 class ClippingTest : public ::testing::Test {
