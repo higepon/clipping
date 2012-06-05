@@ -88,7 +88,7 @@ typedef std::vector<DrawAction> DrawActions;
 
 class Graphics {
  public:
-  Graphics() : drew_something_(false) {
+  Graphics() {
   }
 
   void setClip(int x, int y, int w, int h) {
@@ -103,13 +103,8 @@ class Graphics {
 
   void drawPixel(int x, int y) {
     if (x >= x_min_ && x <= x_max_ && y >= y_min_ && y <= y_max_) {
-      markAsDrewSomething();
+      addDrawAction(DrawAction(x, y));
     }
-  }
-
-  // for testability
-  bool drewSomething() const {
-    return drew_something_;
   }
 
   DrawActions drawActions() const {
@@ -124,10 +119,6 @@ class Graphics {
     BOTTOM = 4,  // 0100
     TOP = 8      // 1000
   };
-
-  void markAsDrewSomething() {
-    drew_something_ = true;
-  }
 
   OutCode ComputeOutCode(double x, double y) {
     OutCode code;
@@ -203,7 +194,6 @@ class Graphics {
       //      DrawRectangle(xmin, ymin, xmax, ymax);
       //      LineSegment(x0, y0, x1, y1);
       addDrawAction(DrawAction(x0, y0, x1, y1));
-      markAsDrewSomething();
     }
   }
 
@@ -211,7 +201,6 @@ class Graphics {
     actions_.push_back(action);
   }
 
-  bool drew_something_;
   double x_min_;
   double x_max_;
   double y_min_;
@@ -233,25 +222,31 @@ class ClippingTest : public ::testing::Test {
 TEST_F(ClippingTest, PixelOutsideOfClippedRegionShouldNotBeRenderred) {
   g_.setClip(0, 0, 10, 10);
   g_.drawPixel(20, 20);
-  EXPECT_FALSE(g_.drewSomething());
+  DrawActions actions = g_.drawActions();
+  ASSERT_EQ(0, actions.size());
 }
 
 TEST_F(ClippingTest, PixelInsideOfClippedRegionShouldBeRenderred) {
   g_.setClip(0, 0, 10, 10);
   g_.drawPixel(5, 5);
-  EXPECT_TRUE(g_.drewSomething());
+  DrawActions actions = g_.drawActions();
+  ASSERT_EQ(1, actions.size());
+  ASSERT_EQ(DrawAction(5, 5), actions[0]);
 }
 
 TEST_F(ClippingTest, LineOutsideOfClippedRegionShouldNotBeRenderred) {
   g_.setClip(0, 0, 10, 10);
   g_.drawLine(20, 20, 40, 40);
-  EXPECT_FALSE(g_.drewSomething());
+  DrawActions actions = g_.drawActions();
+  ASSERT_EQ(0, actions.size());
 }
 
 TEST_F(ClippingTest, LineInsideOfClippedRegionShouldBeRenderred) {
   g_.setClip(0, 0, 10, 10);
   g_.drawLine(2, 2, 4, 4);
-  EXPECT_TRUE(g_.drewSomething());
+  DrawActions actions = g_.drawActions();
+  ASSERT_EQ(1, actions.size());
+  ASSERT_EQ(DrawAction(2, 2, 4, 4), actions[0]);
 }
 
 TEST_F(ClippingTest, HorizontalLineShouldBeClipped) {
