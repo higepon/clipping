@@ -295,6 +295,16 @@ TEST_F(ClippingTest, NormalRectangleShouldBeClipped) {
   ASSERT_EQ(DrawAction(0, 1, 1, 1), actions[1]);
 }
 
+TEST_F(ClippingTest, NormalRectangleShouldBeClipped2) {
+  g_.setClip(0, 0, 10, 10);
+  g_.fillRect(0, 5, 12, 2);
+  DrawActions actions = g_.drawActions();
+  ASSERT_EQ(2, actions.size());
+  ASSERT_EQ(DrawAction(0, 5, 10, 5), actions[0]);
+  ASSERT_EQ(DrawAction(0, 6, 10, 6), actions[1]);
+}
+
+
 }  // namespace
 
 int main(int argc, char **argv) {
