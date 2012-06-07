@@ -193,8 +193,12 @@ class Graphics {
     if (accept) {
       //      DrawRectangle(xmin, ymin, xmax, ymax);
       //      LineSegment(x0, y0, x1, y1);
-      addDrawAction(DrawAction(x0, y0, x1, y1));
+      drawLineDirect(x0, y0, x1, y1);
     }
+  }
+
+  void drawLineDirect(int x0, int y0, int x1, int y1) {
+    addDrawAction(DrawAction(x0, y0, x1, y1));
   }
 
   void addDrawAction(const DrawAction& action) {
@@ -271,6 +275,15 @@ TEST_F(ClippingTest, NormalLineShouldBeClipped) {
   DrawActions actions = g_.drawActions();
   ASSERT_EQ(1, actions.size());
   ASSERT_EQ(DrawAction(5, 5, 15, 15), actions[0]);
+}
+
+TEST_F(ClippingTest, NormalRectangleShouldBeClipped) {
+  g_.setClip(0, 0, 10, 10);
+  g_.fillRect(0, 0, 2, 2);
+  DrawActions actions = g_.drawActions();
+  ASSERT_EQ(2, actions.size());
+  ASSERT_EQ(DrawAction(0, 0, 1, 0), actions[0]);
+  ASSERT_EQ(DrawAction(0, 1, 1, 1), actions[0]);
 }
 
 }  // namespace
