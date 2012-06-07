@@ -97,8 +97,17 @@ class Graphics {
     y_min_ = y;
     y_max_ = y + h;
   }
+
   void drawLine(int x1, int y1, int x2, int y2) {
     CohenSutherlandLineClip(x1, y1, x2, y2);
+  }
+
+  void fillRect(int x, int y, int w, int h) {
+    int x_to = x + w;
+    int y_to = y + h;
+    for (int j = y; j < y_to; j++) {
+      drawLine(x, j, x_to - 1, j);
+    }
   }
 
   void drawPixel(int x, int y) {
@@ -283,7 +292,7 @@ TEST_F(ClippingTest, NormalRectangleShouldBeClipped) {
   DrawActions actions = g_.drawActions();
   ASSERT_EQ(2, actions.size());
   ASSERT_EQ(DrawAction(0, 0, 1, 0), actions[0]);
-  ASSERT_EQ(DrawAction(0, 1, 1, 1), actions[0]);
+  ASSERT_EQ(DrawAction(0, 1, 1, 1), actions[1]);
 }
 
 }  // namespace
